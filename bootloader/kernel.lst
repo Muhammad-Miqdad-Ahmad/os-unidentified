@@ -1,0 +1,32 @@
+     1                                  	[org    0x8000]
+     2                                  
+     3 00000000 56                      	push    si
+     4 00000001 BE[0B00]                	mov     si, hello
+     5 00000004 E82400                  	call    printf
+     6 00000007 5E                      	pop     si
+     7                                  
+     8                                  hang:
+     9 00000008 F4                      	hlt
+    10 00000009 EBFD                    	jmp     hang
+    11                                  
+    12 0000000B 48656C6C6F2066726F-     hello           db      "Hello from The OS Unidentified.", 0
+    12 00000014 6D20546865204F5320-
+    12 0000001D 556E6964656E746966-
+    12 00000026 6965642E00         
+    13                                  
+    14                                  printf:         								; sub routiene aka function in assembly
+    15 0000002B 50                      	push    ax									; Save AX OH I LOVE THE STACK
+    16 0000002C B40E                    	mov     ah, 0Eh
+    17                                  .loop_start:
+    18 0000002E 8A04                    	mov     al, [si]							; load the data at the memory address stored in DS+SI,
+    19 00000030 3C00                    	cmp     al, 0x00							; compare if al is 0 (string terminator)
+    20 00000032 7405                    	je      .loop_end							; if yes then go to loop end if not then continue
+    21                                  
+    22 00000034 CD10                    	int     10h									; execute the interrupt
+    23 00000036 46                      	inc     si									; increment thevalue of si,
+    24 00000037 EBF5                    	jmp     .loop_start							; Jump back to '.loop_start' regardless
+    25                                  .loop_end:
+    26 00000039 58                      	pop     ax
+    27 0000003A C3                      	ret     									; return to the caller
+    28                                  
+    29 0000003B 00<rep 1C5h>            	times   512-($-$$) db 0
