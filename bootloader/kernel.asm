@@ -9,6 +9,12 @@ hang:
 	hlt
 	jmp     hang
 
+gdt_start:
+    dq 0                    ; NULL descriptor
+    dq 0x00CF9A000000FFFF   ; CODE descriptor
+    dq 0x00CF92000000FFFF   ; DATA descriptor
+gdt_end: 
+
 hello           db      "Hello from The OS Unidentified.", 0
 
 printf:         								; sub routiene aka function in assembly
