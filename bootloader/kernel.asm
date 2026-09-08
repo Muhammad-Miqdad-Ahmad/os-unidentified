@@ -4,7 +4,7 @@
 ; dq → 8 bytes
 
 	[org    0x8000]
-
+	[BITS 16]
 	push    si
 	mov     si, hello
 	call    printf
@@ -14,8 +14,21 @@
 	mov     si, newline
 	call    printf
 	pop     si
-	
-	lgdt [gdt_discriptor]
+
+	lgdt    [gdt_discriptor]
+
+	mov     eax, cr0
+	or      eax, 1
+	mov     cr0, eax
+
+	jmp     dword 0x08:protected_mode
+
+protected_mode:
+	[BITS 32]
+	mov     ax, 0x10
+	mov     ds, ax
+	mov     es, ax
+	mov     ss, ax
 
 hang:
 	hlt

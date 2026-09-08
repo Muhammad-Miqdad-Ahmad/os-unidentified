@@ -31,6 +31,9 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN)
 run: $(DISK)
 	qemu-system-x86_64 -hda $(DISK) -s -S
 
+run-pro: $(DISK)
+	qemu-system-i386 -hda $(DISK) -s -S
+
 lst: $(BOOT_SRC) $(KERNEL_SRC) | $(BUILDDIR)
 	$(ASM) $(BOOT_SRC)   -f bin -o $(BOOT_BIN)   -l $(BUILDDIR)/boot.lst
 	$(ASM) $(KERNEL_SRC) -f bin -o $(KERNEL_BIN) -l $(BUILDDIR)/kernel.lst
