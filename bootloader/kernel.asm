@@ -1,21 +1,38 @@
+; db → 1 byte
+; dw → 2 bytes
+; dd → 4 bytes
+; dq → 8 bytes
+
 	[org    0x8000]
 
 	push    si
 	mov     si, hello
 	call    printf
+
+	mov     si, newline
+	call    printf
+	mov     si, newline
+	call    printf
 	pop     si
+	
+	lgdt [gdt_discriptor]
 
 hang:
 	hlt
 	jmp     hang
 
+gdt_discriptor:
+	dw      gdt_end - gdt_start - 1
+	dd      gdt_start
+
 gdt_start:
-    dq 0                    ; NULL descriptor
-    dq 0x00CF9A000000FFFF   ; CODE descriptor
-    dq 0x00CF92000000FFFF   ; DATA descriptor
-gdt_end: 
+	dq      0									; NULL descriptor ;dq writes an entire 8 byte to memory. 64 bit
+	dq      0x00CF9A000000FFFF					; CODE descriptor
+	dq      0x00CF92000000FFFF					; DATA descriptor
+gdt_end:
 
 hello           db      "Hello from The OS Unidentified.", 0
+newline         db      0x0D, 0x0A, 0
 
 printf:         								; sub routiene aka function in assembly
 	push    ax									; Save AX OH I LOVE THE STACK
