@@ -4,16 +4,9 @@
 ; dq → 8 bytes
 
 	[org    0x8000]
-	[BITS 16]
-	push    si
-	mov     si, hello
-	call    printf
-
-	mov     si, newline
-	call    printf
-	mov     si, newline
-	call    printf
-	pop     si
+	[bits   16]
+	mov     ax, 0x0003
+	int     0x10
 
 	lgdt    [gdt_discriptor]
 
@@ -24,13 +17,22 @@
 	jmp     dword 0x08:protected_mode
 
 protected_mode:
-	[BITS 32]
+	[bits   32]
 	mov     ax, 0x10
 	mov     ds, ax
 	mov     es, ax
 	mov     ss, ax
 
+	; Now Writing the VGA memory
+	; Hello from OS unidentified
+
+	mov     esi, hello
+	mov     edi, 0xB8000
+	call    printf
+
+
 hang:
+	cli
 	hlt
 	jmp     hang
 
@@ -44,22 +46,21 @@ gdt_start:
 	dq      0x00CF92000000FFFF					; DATA descriptor
 gdt_end:
 
+printf:
+.loop:
+	mov     al, [esi]
+	cmp     al, 0
+	je      .done
+
+	mov     [edi], al
+	mov     byte [edi + 1], 0x0F
+
+	inc     esi
+	add     edi, 2
+
+	jmp     .loop
+
+.done:
+	ret
+
 hello           db      "Hello from The OS Unidentified.", 0
-newline         db      0x0D, 0x0A, 0
-
-printf:         								; sub routiene aka function in assembly
-	push    ax									; Save AX OH I LOVE THE STACK
-	mov     ah, 0Eh
-.loop_start:
-	mov     al, [si]							; load the data at the memory address stored in DS+SI,
-	cmp     al, 0x00							; compare if al is 0 (string terminator)
-	je      .loop_end							; if yes then go to loop end if not then continue
-
-	int     10h									; execute the interrupt
-	inc     si									; increment thevalue of si,
-	jmp     .loop_start							; Jump back to '.loop_start' regardless
-.loop_end:
-	pop     ax
-	ret     									; return to the caller
-
-	times   512-($-$$) db 0
