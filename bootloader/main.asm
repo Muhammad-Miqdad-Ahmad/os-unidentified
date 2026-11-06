@@ -108,7 +108,8 @@ failure_reading db      "Could not read the next sector", 0
 dap:
 	db      16									; size
 	db      0
-	dw      1									; read 1 sector
+	; dw      1									; read 1 sector from memory
+	dw      2									; read 2 sectors from memory
 
 	dw      0x8000								; offset
 	dw      0x0000								; segment

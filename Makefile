@@ -10,6 +10,9 @@ SECTORS    := 2880
 
 ASM := nasm
 
+QEMU       := qemu-system-i386
+QEMU_FLAGS := -drive format=raw,file=$(DISK) -display gtk
+
 all: $(DISK)
 
 # create build dir if missing
@@ -28,11 +31,21 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN)
 	dd if=$(KERNEL_BIN) of=$@ bs=512 seek=1 count=1 conv=notrunc status=none
 	@echo "built $@ ($(SECTORS) sectors)"
 
+# boot normally
 run: $(DISK)
-	qemu-system-x86_64 -hda $(DISK) -s -S
+	$(QEMU) $(QEMU_FLAGS)
 
-run-pro: $(DISK)
-	qemu-system-i386 -hda $(DISK) -s -S
+# paused, waiting for gdb on :1234
+debug: $(DISK)
+	$(QEMU) $(QEMU_FLAGS) -s -S
+
+# boot in terminal (no window)
+run-term: $(DISK)
+	$(QEMU) -drive format=raw,file=$(DISK) -display curses
+
+# 64-bit machine, paused (old `run`)
+debug-64: $(DISK)
+	qemu-system-x86_64 $(QEMU_FLAGS) -s -S
 
 lst: $(BOOT_SRC) $(KERNEL_SRC) | $(BUILDDIR)
 	$(ASM) $(BOOT_SRC)   -f bin -o $(BOOT_BIN)   -l $(BUILDDIR)/boot.lst
@@ -41,4 +54,4 @@ lst: $(BOOT_SRC) $(KERNEL_SRC) | $(BUILDDIR)
 clean:
 	rm -rf $(BUILDDIR)
 
-.PHONY: all run lst clean
+.PHONY: all run debug run-term debug-64 lst clean
